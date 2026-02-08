@@ -117,6 +117,8 @@
     <div id="screen-clients" class="screen active">
         <header>
             <h1>Seleccionar Cliente</h1>
+            <div id="current-date" style="font-size:28px; font-weight:bold; margin-top:8px; color:#007aff;"></div>
+            <button class="action-btn btn-success" id="btn-enviar-dia" style="font-size:24px; padding:24px; margin-top:24px; width:100%;" onclick="enviarPedidoDia()">Enviar Pedido Diario</button>
         </header>
         <div class="container" id="client-list">
             </div>
@@ -164,7 +166,6 @@
             <button class="action-btn btn-success" onclick="sendWhatsApp()">Enviar por WhatsApp</button>
             <button class="action-btn btn-secondary" onclick="copyToClipboard()">Copiar Texto</button>
             <button class="action-btn btn-secondary" onclick="resetOrder()">Nuevo Pedido</button>
-            <button class="action-btn btn-secondary" onclick="enviarPedidoDia()">Enviar Pedido Diario</button>
         </div>
     </div>
 
@@ -198,6 +199,8 @@
                     </div>
                 `;
             }
+            showCurrentDate();
+            checkPedidoDiaEnviado();
         }
 
         // Navegación
@@ -325,12 +328,28 @@
                 alert('El pedido diario ya fue enviado hoy.');
                 return;
             }
-            const text = document.getElementById('final-text').innerText;
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Pedido diario copiado y marcado como enviado.');
-                localStorage.setItem('pedidoEnviado_' + today, 'true');
-                document.getElementById('btn-enviar-dia').disabled = true;
-            });
+            // Obtener el texto del pedido
+            let allOrders = JSON.parse(localStorage.getItem('bakeryOrders') || '{}');
+            const dateStr = `${new Date().getDate()}-${new Date().toLocaleString('es-MX', { month: 'short' })}`;
+            let text = `*PEDIDO ${dateStr}\n----------------\n`;
+            let totalItems = 0;
+            const dayOrders = allOrders[today];
+            for (let client in dayOrders) {
+                text += `${client}\n`;
+                for (let prod in dayOrders[client]) {
+                    if (dayOrders[client][prod] > 0) {
+                        text += `${prod} - ${dayOrders[client][prod]}\n`;
+                        totalItems += dayOrders[client][prod];
+                    }
+                }
+                text += `----------------\n`;
+            }
+            text += `*Total Piezas:* ${totalItems}\n📅 ${dateStr}`;
+            // Enviar por WhatsApp
+            const urlEncoded = encodeURIComponent(text);
+            window.open(`https://wa.me/?text=${urlEncoded}`, '_blank');
+            localStorage.setItem('pedidoEnviado_' + today, 'true');
+            document.getElementById('btn-enviar-dia').disabled = true;
         }
 
         // Al mostrar resumen, deshabilitar botón si ya fue enviado
@@ -340,6 +359,13 @@
             if (btn) {
                 btn.disabled = !!localStorage.getItem('pedidoEnviado_' + today);
             }
+        }
+
+        // Mostrar fecha actual en la parte superior
+        function showCurrentDate() {
+            const today = new Date();
+            const dateStr = `${today.getDate()}-${today.toLocaleString('es-MX', { month: 'short' })}`;
+            document.getElementById('current-date').innerText = `Hoy: ${dateStr}`;
         }
 
         // Arrancar la app
