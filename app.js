@@ -7,7 +7,7 @@ const state = {
         "Breck": ["Croissant", "Chocolatín", "Hogaza", "Foccacia", "Brioche", "Croissant Almendra", "Galleta Chispas", "Galleta Chispas"],
         "Cafe del sur": ["Croissant", "Demi baguette", "Baguette", "Caja Blanco", "Caja Multigrano", "Bollo", "Ciabatta"],
         "Amïn": ["Croissant", "chocolarín", "Croissant Almendra", "Croissant Frutal", "Croissant Chocolate", "Chocolatín Almendra", "Scone", "Tartas Rústica", "Cocada", "Rol de Canela", "Galleta Chispas", "Galleta Avena", "Galleta Red Velvet", "Galleta Doble Chocolate", "Panque Zanahoria", "Panque Plátano", "Panque Limón", "Hogaza", "Ciabatta"],
-        "Blom": ["Croissant", "Chocolatín", "Scone", "Galleta"],
+        "Blom": ["Croissant", "Chocolatín", "Scone", "Galleta","Hogaza"],
         "Charcuteri": ["Croissant"],
         "Ponke": ["Hogaza", "Baguette", "Brioche", "Scone", "Tarta Rústica"],
         "Zuzu": ["Croissant", "Chocolatín", "Croissant Almendra", "Croissant Frutal", "Scone", "Muffin", "Croapan", "Rol de Canela"],
