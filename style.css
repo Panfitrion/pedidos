@@ -123,21 +123,30 @@ h2 {
 }
 
 .back-button {
-    background: var(--card-bg);
+    background: transparent;
     border: none;
-    color: var(--text-primary);
-    font-size: 15px;
-    font-weight: 600;
-    padding: 8px 16px;
-    border-radius: 20px;
+    color: var(--accent-color);
+    font-size: 17px;
+    font-weight: 400;
+    padding: 8px 0;
     cursor: pointer;
     display: flex;
     align-items: center;
-    box-shadow: var(--card-shadow);
+    box-shadow: none;
+}
+
+.back-button svg {
+    margin-right: 2px;
+    width: 24px;
+    height: 24px;
+    transform: translateX(-4px);
+    /* Pull icon closer to edge */
 }
 
 .back-button:active {
-    transform: scale(0.95);
+    opacity: 0.5;
+    transform: none;
+    /* Remove scale transform from generic btn */
 }
 
 .product-list {

@@ -107,8 +107,14 @@ function renderDetail() {
 
     let html = `
         <div class="detail-header">
-             <div style="font-weight: 800; font-size: 24px; letter-spacing: -0.5px;">${state.currentCafeteria}</div>
+            <button class="back-button" onclick="renderHome()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                Inicio
+            </button>
              <div class="date-badge">${state.currentDate}</div>
+        </div>
+        <div style="margin-bottom: 24px; padding: 0 4px;">
+            <h1 style="margin-bottom: 0; font-size: 32px; letter-spacing: -0.03em;">${state.currentCafeteria}</h1>
         </div>
         
         <div class="product-list">
@@ -138,9 +144,6 @@ function renderDetail() {
         <div class="action-buttons">
             <button class="btn btn-primary" onclick="saveDay()">Guardar día</button>
             <button class="btn btn-secondary" onclick="renderWeek()">Ver Semana</button>
-        </div>
-        <div style="text-align: center; margin-top: 20px;">
-            <button style="background:none; border:none; color: var(--text-secondary); text-decoration: underline;" onclick="renderHome()">Volver al Inicio</button>
         </div>
     `;
 
@@ -276,6 +279,13 @@ function attachLongPressHandlers(productsList) {
         el.addEventListener('pointerleave', cancel);
         el.addEventListener('pointercancel', cancel);
     });
+}
+
+// --- Utils ---
+
+function formatDate(isoDate) {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(isoDate).toLocaleDateString('es-ES', options);
 }
 
 function saveDay() {
