@@ -611,26 +611,26 @@ let modalBranches = [];
 let modalProducts = [];
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
-function slugify(str) {
-  return str.toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
-    .trim().replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
-}
-
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 }
 
 function getBaseUrl() {
   const url = new URL(window.location.href);
-  const base = url.origin + url.pathname.replace('index.html', '').replace(/\/$/, '');
+  const base = url.origin + url.pathname.replace('index.html', '').replace(/\/+$/, '');
   return base;
 }
 
+// Codifica los datos de la cafetería en Base64 para la URL
+function encodeCafe(cafe) {
+  const data = { n: cafe.name, b: cafe.branches, p: cafe.products };
+  const json = JSON.stringify(data);
+  // btoa no soporta utf-8 directamente, usamos encodeURIComponent
+  return btoa(unescape(encodeURIComponent(json)));
+}
+
 function getCafeUrl(cafe) {
-  return getBaseUrl() + '/pedido.html?cafe=' + cafe.slug;
+  return getBaseUrl() + '/pedido.html?d=' + encodeCafe(cafe);
 }
 
 function save() {
@@ -849,26 +849,17 @@ function saveCafe() {
 
   if (editingId) {
     const idx = cafes.findIndex(c => c.id === editingId);
-    const oldSlug = cafes[idx].slug;
     cafes[idx] = {
       ...cafes[idx],
       name,
-      slug: oldSlug,
       branches: modalBranches,
       products: modalProducts
     };
     showToast('Cafetería actualizada');
   } else {
-    let slug = slugify(name);
-    // asegurar slug único
-    let counter = 2;
-    while (cafes.find(c => c.slug === slug)) {
-      slug = slugify(name) + '-' + counter++;
-    }
     cafes.push({
       id: uid(),
       name,
-      slug,
       branches: modalBranches,
       products: modalProducts
     });
