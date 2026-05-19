@@ -698,8 +698,7 @@ function sendOrder() {
   }
 
   msg += `─────────────────\n`;
-  msg += `📲 Enviado desde el formulario de pedidos`;
-
+ 
   const encoded = encodeURIComponent(msg);
   // Abre el share nativo de WhatsApp sin número — el cliente elige el contacto
   const waUrl = `https://api.whatsapp.com/send?text=${encoded}`;
