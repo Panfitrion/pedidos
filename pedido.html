@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pedido</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F4F0;
+    --surface: #FFFFFF;
+    --surface2: #EEECEA;
+    --border: #D8D5CF;
+    --text: #1A1917;
+    --text-muted: #7A7570;
+    --accent: #2D6A4F;
+    --accent-light: #D8EDE3;
+    --accent-dark: #1B4332;
+    --radius: 14px;
+    --radius-sm: 8px;
+    --shadow: 0 2px 16px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding-bottom: 120px;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--text);
+    color: white;
+    padding: 20px 20px 18px;
+    text-align: center;
+  }
+
+  header .cafe-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    letter-spacing: -0.3px;
+  }
+
+  header .cafe-subtitle {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 3px;
+    font-weight: 300;
+  }
+
+  /* MAIN */
+  main {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 24px 16px;
+  }
+
+  /* SECTION */
+  .section {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .section-title {
+    padding: 16px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.9px;
+    color: var(--text-muted);
+  }
+
+  /* ─── DATE WHEEL ─────────────────────────────────────────────────────────── */
+  .date-wheel-container {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .date-wheel-track {
+    position: relative;
+    width: 100%;
+    height: 64px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* fade edges */
+  .date-wheel-track::before,
+  .date-wheel-track::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    height: 18px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .date-wheel-track::before { top: 0; background: linear-gradient(to bottom, white, transparent); }
+  .date-wheel-track::after  { bottom: 0; background: linear-gradient(to top, white, transparent); }
+
+  .date-display {
+    text-align: center;
+    user-select: none;
+  }
+
+  .date-display .day-name {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 3px;
+  }
+
+  .date-display .date-full {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .date-display .date-year {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .date-nav {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .date-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text);
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .date-btn:hover { background: var(--surface2); }
+  .date-btn:active { transform: scale(0.93); }
+  .date-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .date-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .date-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: background 0.2s, transform 0.2s;
+  }
+  .date-dot.active {
+    background: var(--accent);
+    transform: scale(1.3);
+  }
+
+  /* ─── TABLE ──────────────────────────────────────────────────────────────── */
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 280px;
+  }
+
+  thead th {
+    padding: 12px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    white-space: nowrap;
+    background: var(--surface);
+  }
+
+  thead th:first-child {
+    text-align: left;
+    min-width: 120px;
+    max-width: 160px;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+  }
+  tbody tr:last-child { border-bottom: none; }
+
+  tbody tr:nth-child(even) td { background: #FAFAF9; }
+
+  tbody td {
+    padding: 10px 14px;
+    font-size: 14px;
+    vertical-align: middle;
+  }
+
+  tbody td:first-child {
+    font-weight: 500;
+    color: var(--text);
+    max-width: 160px;
+  }
+
+  tbody td.qty-cell {
+    text-align: center;
+    padding: 6px 8px;
+  }
+
+  /* ─── QTY SCROLL ─────────────────────────────────────────────────────────── */
+  .qty-scroll {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    user-select: none;
+    touch-action: none;
+  }
+
+  .qty-btn {
+    width: 34px;
+    height: 26px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    border-radius: 6px;
+    transition: background 0.12s;
+    padding: 0;
+  }
+  .qty-btn:active { background: var(--accent-light); }
+
+  .qty-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    line-height: 1;
+    min-width: 34px;
+    text-align: center;
+    color: var(--text);
+    padding: 2px 0;
+    transition: transform 0.1s, opacity 0.1s;
+  }
+
+  .qty-value.bump-up {
+    animation: bumpUp 0.15s ease;
+  }
+  .qty-value.bump-down {
+    animation: bumpDown 0.15s ease;
+  }
+
+  @keyframes bumpUp {
+    0% { transform: translateY(0); opacity: 1; }
+    40% { transform: translateY(-6px); opacity: 0.5; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes bumpDown {
+    0% { transform: translateY(0); opacity: 1; }
+    40% { transform: translateY(6px); opacity: 0.5; }
+    100% { transform: translateY(0); opacity: 1; }
+  }
+
+  /* ─── EMPTY PRODUCTS ─────────────────────────────────────────────────────── */
+  .empty-products {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+
+  /* ─── SEND BUTTON ────────────────────────────────────────────────────────── */
+  .send-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 20px;
+    background: white;
+    border-top: 1.5px solid var(--border);
+    display: flex;
+    justify-content: center;
+    z-index: 50;
+  }
+
+  .send-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #25D366;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 15px 36px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: 0 4px 16px rgba(37,211,102,0.35);
+    width: 100%;
+    max-width: 400px;
+    justify-content: center;
+  }
+  .send-btn:hover { background: #1ebe5d; }
+  .send-btn:active { transform: scale(0.97); }
+
+  /* ─── ERROR STATE ────────────────────────────────────────────────────────── */
+  .error-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    padding: 40px 24px;
+    gap: 12px;
+  }
+
+  .error-screen h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+  }
+
+  .error-screen p {
+    color: var(--text-muted);
+    font-size: 15px;
+    max-width: 280px;
+  }
+
+  /* BRANCH HEADER */
+  thead th.branch-col {
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    min-width: 90px;
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(60px);
+    background: var(--text);
+    color: white;
+    padding: 11px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    transition: transform 0.25s ease;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* ANIMATION */
+  .section {
+    animation: fadeUp 0.3s ease both;
+  }
+  .section:nth-child(1) { animation-delay: 0.05s; }
+  .section:nth-child(2) { animation-delay: 0.12s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- Rendered by JS -->
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+const DAYS_ES = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+const MONTHS_ES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+
+function getValidDates() {
+  const dates = [];
+  const now = new Date();
+  let d = new Date(now);
+  d.setDate(d.getDate() + 1); // start from tomorrow
+  while (dates.length < 7) {
+    if (d.getDay() !== 0) { // skip Sunday
+      dates.push(new Date(d));
+    }
+    d.setDate(d.getDate() + 1);
+  }
+  return dates;
+}
+
+function formatDateDisplay(date) {
+  return {
+    dayName: DAYS_ES[date.getDay()],
+    dateNum: date.getDate(),
+    month: MONTHS_ES[date.getMonth()],
+    year: date.getFullYear()
+  };
+}
+
+function formatDateMessage(date) {
+  const d = formatDateDisplay(date);
+  return `${d.dayName} ${d.dateNum} de ${d.month} de ${d.year}`;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── LOAD CAFE DATA ───────────────────────────────────────────────────────────
+const params = new URLSearchParams(window.location.search);
+const cafeSlug = params.get('cafe');
+const cafes = JSON.parse(localStorage.getItem('pedidos_cafes') || '[]');
+const cafe = cafes.find(c => c.slug === cafeSlug);
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let selectedDateIdx = 0;
+let quantities = {}; // { "product|||branch": qty }
+const validDates = getValidDates();
+
+function getQtyKey(product, branch) {
+  return product + '|||' + branch;
+}
+
+function getQty(product, branch) {
+  return quantities[getQtyKey(product, branch)] || 0;
+}
+
+function setQty(product, branch, val) {
+  const key = getQtyKey(product, branch);
+  const v = Math.max(0, Math.min(99, val));
+  quantities[key] = v;
+  return v;
+}
+
+// ─── RENDER ERROR ─────────────────────────────────────────────────────────────
+function renderError() {
+  document.getElementById('app').innerHTML = `
+    <header>
+      <div class="cafe-name">Pedidos en línea</div>
+    </header>
+    <main>
+      <div class="error-screen">
+        <svg width="48" height="48" fill="none" stroke="#7A7570" stroke-width="1.5" viewBox="0 0 24 24"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+        <h2>Cafetería no encontrada</h2>
+        <p>El enlace que usaste no corresponde a ninguna cafetería registrada. Pide el enlace correcto a quien te lo compartió.</p>
+      </div>
+    </main>
+  `;
+}
+
+// ─── RENDER APP ───────────────────────────────────────────────────────────────
+function renderApp() {
+  const hasBranches = cafe.branches.length > 0;
+  const hasProducts = cafe.products.length > 0;
+
+  document.getElementById('app').innerHTML = `
+    <header>
+      <div class="cafe-name">${cafe.name}</div>
+      <div class="cafe-subtitle">Formulario de pedido</div>
+    </header>
+    <main>
+
+      <!-- DATE SECTION -->
+      <div class="section">
+        <div class="section-title">Fecha de entrega</div>
+        <div class="date-wheel-container">
+          <div class="date-wheel-track">
+            <div class="date-display" id="date-display"></div>
+          </div>
+          <div class="date-nav">
+            <button class="date-btn" id="date-prev" onclick="changeDate(-1)">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <div class="date-dots" id="date-dots"></div>
+            <button class="date-btn" id="date-next" onclick="changeDate(1)">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS SECTION -->
+      <div class="section">
+        <div class="section-title">Productos${hasBranches && cafe.branches.length > 1 ? ' por sucursal' : ''}</div>
+        ${hasProducts ? `
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Producto</th>
+                  ${hasBranches
+                    ? cafe.branches.map(b => `<th class="branch-col">${b}</th>`).join('')
+                    : '<th class="branch-col">Cantidad</th>'
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                ${cafe.products.map(product => `
+                  <tr>
+                    <td>${product}</td>
+                    ${hasBranches
+                      ? cafe.branches.map(branch => `
+                          <td class="qty-cell">
+                            <div class="qty-scroll" id="qty-${slugKey(product, branch)}">
+                              <button class="qty-btn" onclick="changeQty('${esc(product)}','${esc(branch)}',1)">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>
+                              </button>
+                              <div class="qty-value" id="qval-${slugKey(product, branch)}">0</div>
+                              <button class="qty-btn" onclick="changeQty('${esc(product)}','${esc(branch)}',-1)">
+                                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                              </button>
+                            </div>
+                          </td>
+                        `).join('')
+                      : `<td class="qty-cell">
+                           <div class="qty-scroll" id="qty-${slugKey(product, '_default')}">
+                             <button class="qty-btn" onclick="changeQty('${esc(product)}','_default',1)">
+                               <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M18 15l-6-6-6 6"/></svg>
+                             </button>
+                             <div class="qty-value" id="qval-${slugKey(product, '_default')}">0</div>
+                             <button class="qty-btn" onclick="changeQty('${esc(product)}','_default',-1)">
+                               <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+                             </button>
+                           </div>
+                         </td>`
+                    }
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        ` : `<div class="empty-products">Esta cafetería aún no tiene productos registrados.</div>`}
+      </div>
+
+    </main>
+
+    <!-- SEND BAR -->
+    <div class="send-bar">
+      <button class="send-btn" onclick="sendOrder()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.104.547 4.078 1.503 5.793L0 24l6.376-1.668A11.95 11.95 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.817 9.817 0 01-5.003-1.368l-.359-.214-3.737.98.996-3.648-.234-.374A9.817 9.817 0 012.182 12C2.182 6.573 6.573 2.182 12 2.182c5.428 0 9.818 4.39 9.818 9.818 0 5.427-4.39 9.818-9.818 9.818z"/></svg>
+        Enviar pedido por WhatsApp
+      </button>
+    </div>
+  `;
+
+  renderDate();
+  renderDots();
+}
+
+function slugKey(product, branch) {
+  return (product + '_' + branch).replace(/[^a-zA-Z0-9]/g, '_').substring(0, 40);
+}
+
+function esc(s) {
+  return s.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+}
+
+// ─── DATE WHEEL ───────────────────────────────────────────────────────────────
+function renderDate() {
+  const date = validDates[selectedDateIdx];
+  const d = formatDateDisplay(date);
+  document.getElementById('date-display').innerHTML = `
+    <div class="day-name">${d.dayName}</div>
+    <div class="date-full">${d.dateNum} de ${d.month}</div>
+    <div class="date-year">${d.year}</div>
+  `;
+  document.getElementById('date-prev').disabled = selectedDateIdx === 0;
+  document.getElementById('date-next').disabled = selectedDateIdx === validDates.length - 1;
+}
+
+function renderDots() {
+  document.getElementById('date-dots').innerHTML = validDates.map((_, i) =>
+    `<div class="date-dot ${i === selectedDateIdx ? 'active' : ''}"></div>`
+  ).join('');
+}
+
+function changeDate(dir) {
+  const next = selectedDateIdx + dir;
+  if (next < 0 || next >= validDates.length) return;
+  selectedDateIdx = next;
+  renderDate();
+  renderDots();
+}
+
+// ─── QTY SCROLL ──────────────────────────────────────────────────────────────
+function changeQty(product, branch, delta) {
+  const current = getQty(product, branch);
+  const next = setQty(product, branch, current + delta);
+  const el = document.getElementById('qval-' + slugKey(product, branch));
+  if (!el) return;
+  el.textContent = next;
+  const cls = delta > 0 ? 'bump-up' : 'bump-down';
+  el.classList.remove('bump-up', 'bump-down');
+  void el.offsetWidth; // reflow
+  el.classList.add(cls);
+}
+
+// ─── SEND ORDER ───────────────────────────────────────────────────────────────
+function sendOrder() {
+  const hasBranches = cafe.branches.length > 0;
+  const branches = hasBranches ? cafe.branches : ['_default'];
+  const selectedDate = validDates[selectedDateIdx];
+
+  // Check at least one product has qty > 0
+  let hasAny = false;
+  for (const product of cafe.products) {
+    for (const branch of branches) {
+      if (getQty(product, branch) > 0) { hasAny = true; break; }
+    }
+    if (hasAny) break;
+  }
+
+  if (!hasAny) {
+    showToast('Agrega al menos un producto al pedido');
+    return;
+  }
+
+  // Build message
+  const dateStr = formatDateMessage(selectedDate);
+  let msg = '';
+  msg += `📦 *PEDIDO — ${cafe.name}*\n`;
+  msg += `📅 Entrega: ${dateStr}\n`;
+  msg += `─────────────────\n`;
+
+  if (hasBranches && cafe.branches.length > 1) {
+    for (const branch of cafe.branches) {
+      const items = cafe.products
+        .map(p => ({ p, q: getQty(p, branch) }))
+        .filter(x => x.q > 0);
+      if (items.length === 0) continue;
+      msg += `\n🏪 *${branch}*\n`;
+      for (const { p, q } of items) {
+        msg += `  • ${p} x${q}\n`;
+      }
+    }
+  } else {
+    const branch = branches[0];
+    const items = cafe.products
+      .map(p => ({ p, q: getQty(p, branch) }))
+      .filter(x => x.q > 0);
+    for (const { p, q } of items) {
+      msg += `• ${p} x${q}\n`;
+    }
+  }
+
+  msg += `─────────────────\n`;
+  msg += `📲 Enviado desde el formulario de pedidos`;
+
+  const encoded = encodeURIComponent(msg);
+  const waUrl = `https://wa.me/${cafe.whatsapp}?text=${encoded}`;
+  window.open(waUrl, '_blank');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+if (!cafeSlug || !cafe) {
+  renderError();
+} else {
+  document.title = `Pedido — ${cafe.name}`;
+  renderApp();
+}
+</script>
+</body>
+</html>
