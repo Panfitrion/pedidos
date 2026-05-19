@@ -687,7 +687,8 @@ function sendOrder() {
   msg += `📲 Enviado desde el formulario de pedidos`;
 
   const encoded = encodeURIComponent(msg);
-  const waUrl = `https://wa.me/${cafe.whatsapp}?text=${encoded}`;
+  // Abre el share nativo de WhatsApp sin número — el cliente elige el contacto
+  const waUrl = `https://api.whatsapp.com/send?text=${encoded}`;
   window.open(waUrl, '_blank');
 }
 
