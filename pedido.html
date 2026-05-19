@@ -448,9 +448,23 @@ function showToast(msg) {
 
 // ─── LOAD CAFE DATA ───────────────────────────────────────────────────────────
 const params = new URLSearchParams(window.location.search);
-const cafeSlug = params.get('cafe');
-const cafes = JSON.parse(localStorage.getItem('pedidos_cafes') || '[]');
-const cafe = cafes.find(c => c.slug === cafeSlug);
+const cafeData = params.get('d');
+
+let cafe = null;
+if (cafeData) {
+  try {
+    const json = decodeURIComponent(escape(atob(cafeData)));
+    const raw = JSON.parse(json);
+    // Normalizar formato comprimido {n, b, p} → {name, branches, products}
+    cafe = {
+      name: raw.n || raw.name || '',
+      branches: raw.b || raw.branches || [],
+      products: raw.p || raw.products || []
+    };
+  } catch(e) {
+    cafe = null;
+  }
+}
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 let selectedDateIdx = 0;
@@ -693,7 +707,7 @@ function sendOrder() {
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
-if (!cafeSlug || !cafe) {
+if (!cafeData || !cafe) {
   renderError();
 } else {
   document.title = `Pedido — ${cafe.name}`;
