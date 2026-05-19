@@ -1,17 +1,971 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Control Pedidos</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Sistema de Pedidos</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F4F0;
+    --surface: #FFFFFF;
+    --surface2: #EEECEA;
+    --border: #D8D5CF;
+    --text: #1A1917;
+    --text-muted: #7A7570;
+    --accent: #2D6A4F;
+    --accent-light: #D8EDE3;
+    --accent-dark: #1B4332;
+    --danger: #C0392B;
+    --danger-light: #FDECEA;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--text);
+    color: white;
+    padding: 0 32px;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    letter-spacing: -0.3px;
+  }
+
+  header span {
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    font-weight: 300;
+  }
+
+  /* MAIN LAYOUT */
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* SECTION TITLE */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .section-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    letter-spacing: -0.5px;
+  }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: var(--radius-sm);
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+  }
+  .btn-primary:hover { background: var(--accent-dark); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1.5px solid var(--border);
+  }
+  .btn-ghost:hover { background: var(--surface2); }
+
+  .btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border: 1.5px solid var(--danger);
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+  .btn-danger:hover { background: var(--danger-light); }
+
+  .btn-sm {
+    padding: 6px 14px;
+    font-size: 13px;
+  }
+
+  .btn-icon {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.15s;
+  }
+  .btn-icon:hover { background: var(--surface2); color: var(--text); }
+  .btn-icon.danger:hover { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    background: var(--surface);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 60px 32px;
+    text-align: center;
+  }
+
+  .empty-state svg { margin-bottom: 16px; opacity: 0.3; }
+  .empty-state p { color: var(--text-muted); font-size: 15px; }
+
+  /* CAFETERIA CARD */
+  .cafe-list { display: flex; flex-direction: column; gap: 16px; }
+
+  .cafe-card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+  }
+  .cafe-card:hover { box-shadow: var(--shadow-lg); }
+
+  .cafe-card-header {
+    padding: 20px 24px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .cafe-card-info h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    letter-spacing: -0.3px;
+    margin-bottom: 4px;
+  }
+
+  .cafe-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 6px;
+  }
+
+  .cafe-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .cafe-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  /* URL BOX */
+  .url-section {
+    border-top: 1px solid var(--border);
+    background: var(--surface2);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .url-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .url-box {
+    flex: 1;
+    min-width: 0;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    color: var(--accent-dark);
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .copy-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .copy-btn:hover { background: var(--accent-dark); }
+  .copy-btn.copied { background: #555; }
+
+  /* COLLAPSE DETAIL */
+  .cafe-detail {
+    border-top: 1px solid var(--border);
+    padding: 20px 24px;
+    display: none;
+  }
+  .cafe-detail.open { display: block; }
+
+  .toggle-detail-btn {
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--accent);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+    margin-top: 8px;
+  }
+
+  /* DETAIL GRID */
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  @media (max-width: 600px) {
+    .detail-grid { grid-template-columns: 1fr; }
+  }
+
+  .detail-section h4 {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+  }
+
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+
+  .tag {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .tag .remove-tag {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1;
+    padding: 0;
+    transition: color 0.15s;
+    display: flex;
+    align-items: center;
+  }
+  .tag .remove-tag:hover { color: var(--danger); }
+
+  /* ADD INLINE */
+  .add-inline {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .add-inline input {
+    flex: 1;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    background: white;
+    color: var(--text);
+    transition: border-color 0.15s;
+  }
+  .add-inline input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    transform: translateY(16px);
+    transition: transform 0.2s;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+
+  .modal-header {
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+  }
+
+  .modal-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+  }
+
+  .modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 22px;
+    line-height: 1;
+    padding: 4px;
+    transition: color 0.15s;
+  }
+  .modal-close:hover { color: var(--text); }
+
+  .modal-body {
+    padding: 24px 28px;
+  }
+
+  .modal-footer {
+    padding: 16px 28px 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* FORM */
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .form-group input {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--text);
+    background: white;
+    transition: border-color 0.15s;
+  }
+  .form-group input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .form-group .hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 5px;
+  }
+
+  .form-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  /* MULTI ADD */
+  .multi-add-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .multi-add-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .multi-add-item span { flex: 1; }
+
+  .multi-add-row {
+    display: flex;
+    gap: 8px;
+  }
+
+  .multi-add-row input {
+    flex: 1;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    background: white;
+    transition: border-color 0.15s;
+  }
+  .multi-add-row input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--text);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 1000;
+    transition: transform 0.3s ease;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* BADGE */
+  .badge {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+</style>
 </head>
 <body>
-    <div id="app">
-        <!-- Views will be injected here by app.js -->
+
+<header>
+  <h1>Sistema de Pedidos</h1>
+  <span>Panel de administración</span>
+</header>
+
+<main>
+  <div class="section-header">
+    <h2>Cafeterías</h2>
+    <button class="btn btn-primary" onclick="openNewCafeModal()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+      Nueva cafetería
+    </button>
+  </div>
+
+  <div id="cafe-list" class="cafe-list"></div>
+  <div id="empty-state" class="empty-state" style="display:none">
+    <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+    <p style="margin-top:8px; font-size:17px; font-weight:500; color:var(--text)">Sin cafeterías aún</p>
+    <p style="margin-top:6px">Crea tu primera cafetería con el botón de arriba</p>
+  </div>
+</main>
+
+<!-- MODAL NUEVA CAFETERÍA -->
+<div class="modal-overlay" id="cafe-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-title">Nueva cafetería</h2>
+      <button class="modal-close" onclick="closeModal('cafe-modal')">×</button>
     </div>
-    <script src="app.js"></script>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Nombre de la cafetería *</label>
+        <input type="text" id="cafe-name" placeholder="Ej. La Bonne Vie" />
+      </div>
+      <div class="form-group">
+        <label>Número de WhatsApp *</label>
+        <input type="text" id="cafe-wa" placeholder="521XXXXXXXXXX (con código de país)" />
+        <p class="hint">Incluye el código de país sin + ni espacios. Ej: 5215512345678</p>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <div class="form-group">
+        <label>Sucursales</label>
+        <div class="multi-add-list" id="modal-branches-list"></div>
+        <div class="multi-add-row">
+          <input type="text" id="branch-input" placeholder="Nombre de sucursal" onkeydown="if(event.key==='Enter') addModalBranch()" />
+          <button class="btn btn-ghost btn-sm" onclick="addModalBranch()">Agregar</button>
+        </div>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <div class="form-group">
+        <label>Productos</label>
+        <div class="multi-add-list" id="modal-products-list"></div>
+        <div class="multi-add-row">
+          <input type="text" id="product-input" placeholder="Nombre del producto" onkeydown="if(event.key==='Enter') addModalProduct()" />
+          <button class="btn btn-ghost btn-sm" onclick="addModalProduct()">Agregar</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('cafe-modal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCafe()">Guardar cafetería</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let cafes = JSON.parse(localStorage.getItem('pedidos_cafes') || '[]');
+let editingId = null;
+let modalBranches = [];
+let modalProducts = [];
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function slugify(str) {
+  return str.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim().replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function getBaseUrl() {
+  const url = new URL(window.location.href);
+  const base = url.origin + url.pathname.replace('index.html', '').replace(/\/$/, '');
+  return base;
+}
+
+function getCafeUrl(cafe) {
+  return getBaseUrl() + '/pedido.html?cafe=' + cafe.slug;
+}
+
+function save() {
+  localStorage.setItem('pedidos_cafes', JSON.stringify(cafes));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ─── RENDER ──────────────────────────────────────────────────────────────────
+function render() {
+  const list = document.getElementById('cafe-list');
+  const empty = document.getElementById('empty-state');
+
+  if (cafes.length === 0) {
+    list.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  list.innerHTML = cafes.map(cafe => {
+    const url = getCafeUrl(cafe);
+    return `
+      <div class="cafe-card" id="card-${cafe.id}">
+        <div class="cafe-card-header">
+          <div class="cafe-card-info">
+            <h3>${cafe.name}</h3>
+            <div class="cafe-meta">
+              <span class="cafe-meta-item">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0L6.343 16.657a8 8 0 1111.314 0z"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                ${cafe.branches.length} sucursal${cafe.branches.length !== 1 ? 'es' : ''}
+              </span>
+              <span class="cafe-meta-item">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 000 4h6a2 2 0 000-4M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                ${cafe.products.length} producto${cafe.products.length !== 1 ? 's' : ''}
+              </span>
+              <span class="cafe-meta-item">
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                ${cafe.whatsapp}
+              </span>
+            </div>
+            <button class="toggle-detail-btn" onclick="toggleDetail('${cafe.id}')">
+              <svg id="chevron-${cafe.id}" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
+              <span id="toggle-label-${cafe.id}">Ver detalles</span>
+            </button>
+          </div>
+          <div class="cafe-actions">
+            <button class="btn-icon" title="Editar" onclick="openEditModal('${cafe.id}')">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            </button>
+            <button class="btn-icon danger" title="Eliminar" onclick="deleteCafe('${cafe.id}')">
+              <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="url-section">
+          <span class="url-label">URL</span>
+          <span class="url-box" id="url-${cafe.id}">${url}</span>
+          <button class="copy-btn" id="copybtn-${cafe.id}" onclick="copyUrl('${cafe.id}')">Copiar</button>
+        </div>
+
+        <div class="cafe-detail" id="detail-${cafe.id}">
+          <div class="detail-grid">
+            <div class="detail-section">
+              <h4>Sucursales</h4>
+              <div class="tag-list" id="branches-tags-${cafe.id}">
+                ${cafe.branches.map(b => `
+                  <span class="tag">
+                    ${b}
+                    <button class="remove-tag" onclick="removeBranch('${cafe.id}', '${b}')" title="Eliminar sucursal">×</button>
+                  </span>
+                `).join('')}
+              </div>
+              <div class="add-inline">
+                <input type="text" id="new-branch-${cafe.id}" placeholder="Nueva sucursal" onkeydown="if(event.key==='Enter') addBranch('${cafe.id}')" />
+                <button class="btn btn-ghost btn-sm" onclick="addBranch('${cafe.id}')">Agregar</button>
+              </div>
+            </div>
+            <div class="detail-section">
+              <h4>Productos</h4>
+              <div class="tag-list" id="products-tags-${cafe.id}">
+                ${cafe.products.map(p => `
+                  <span class="tag">
+                    ${p}
+                    <button class="remove-tag" onclick="removeProduct('${cafe.id}', '${p}')" title="Eliminar producto">×</button>
+                  </span>
+                `).join('')}
+              </div>
+              <div class="add-inline">
+                <input type="text" id="new-product-${cafe.id}" placeholder="Nuevo producto" onkeydown="if(event.key==='Enter') addProduct('${cafe.id}')" />
+                <button class="btn btn-ghost btn-sm" onclick="addProduct('${cafe.id}')">Agregar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ─── TOGGLE DETAIL ───────────────────────────────────────────────────────────
+function toggleDetail(id) {
+  const detail = document.getElementById('detail-' + id);
+  const label = document.getElementById('toggle-label-' + id);
+  const chevron = document.getElementById('chevron-' + id);
+  const isOpen = detail.classList.toggle('open');
+  label.textContent = isOpen ? 'Ocultar detalles' : 'Ver detalles';
+  chevron.style.transform = isOpen ? 'rotate(180deg)' : '';
+}
+
+// ─── COPY URL ────────────────────────────────────────────────────────────────
+function copyUrl(id) {
+  const url = document.getElementById('url-' + id).textContent;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('copybtn-' + id);
+    btn.textContent = '✓ Copiado';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+// ─── MODAL ───────────────────────────────────────────────────────────────────
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function openNewCafeModal() {
+  editingId = null;
+  modalBranches = [];
+  modalProducts = [];
+  document.getElementById('modal-title').textContent = 'Nueva cafetería';
+  document.getElementById('cafe-name').value = '';
+  document.getElementById('cafe-wa').value = '';
+  document.getElementById('branch-input').value = '';
+  document.getElementById('product-input').value = '';
+  renderModalLists();
+  openModal('cafe-modal');
+  setTimeout(() => document.getElementById('cafe-name').focus(), 100);
+}
+
+function openEditModal(id) {
+  const cafe = cafes.find(c => c.id === id);
+  if (!cafe) return;
+  editingId = id;
+  modalBranches = [...cafe.branches];
+  modalProducts = [...cafe.products];
+  document.getElementById('modal-title').textContent = 'Editar cafetería';
+  document.getElementById('cafe-name').value = cafe.name;
+  document.getElementById('cafe-wa').value = cafe.whatsapp;
+  document.getElementById('branch-input').value = '';
+  document.getElementById('product-input').value = '';
+  renderModalLists();
+  openModal('cafe-modal');
+}
+
+function renderModalLists() {
+  document.getElementById('modal-branches-list').innerHTML = modalBranches.map((b, i) => `
+    <div class="multi-add-item">
+      <span>${b}</span>
+      <button class="btn-icon danger" onclick="removeModalBranch(${i})">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+  `).join('');
+
+  document.getElementById('modal-products-list').innerHTML = modalProducts.map((p, i) => `
+    <div class="multi-add-item">
+      <span>${p}</span>
+      <button class="btn-icon danger" onclick="removeModalProduct(${i})">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+  `).join('');
+}
+
+function addModalBranch() {
+  const input = document.getElementById('branch-input');
+  const val = input.value.trim();
+  if (!val) return;
+  if (modalBranches.includes(val)) { showToast('Esa sucursal ya existe'); return; }
+  modalBranches.push(val);
+  input.value = '';
+  renderModalLists();
+  input.focus();
+}
+
+function removeModalBranch(i) {
+  modalBranches.splice(i, 1);
+  renderModalLists();
+}
+
+function addModalProduct() {
+  const input = document.getElementById('product-input');
+  const val = input.value.trim();
+  if (!val) return;
+  if (modalProducts.includes(val)) { showToast('Ese producto ya existe'); return; }
+  modalProducts.push(val);
+  input.value = '';
+  renderModalLists();
+  input.focus();
+}
+
+function removeModalProduct(i) {
+  modalProducts.splice(i, 1);
+  renderModalLists();
+}
+
+function saveCafe() {
+  const name = document.getElementById('cafe-name').value.trim();
+  const wa = document.getElementById('cafe-wa').value.trim();
+
+  if (!name) { showToast('El nombre es obligatorio'); return; }
+  if (!wa) { showToast('El número de WhatsApp es obligatorio'); return; }
+  if (!/^\d{10,15}$/.test(wa)) { showToast('WhatsApp debe ser solo números (10-15 dígitos)'); return; }
+
+  if (editingId) {
+    const idx = cafes.findIndex(c => c.id === editingId);
+    const oldSlug = cafes[idx].slug;
+    cafes[idx] = {
+      ...cafes[idx],
+      name, whatsapp: wa,
+      slug: oldSlug, // mantener slug al editar
+      branches: modalBranches,
+      products: modalProducts
+    };
+    showToast('Cafetería actualizada');
+  } else {
+    let slug = slugify(name);
+    // asegurar slug único
+    let counter = 2;
+    while (cafes.find(c => c.slug === slug)) {
+      slug = slugify(name) + '-' + counter++;
+    }
+    cafes.push({
+      id: uid(),
+      name,
+      whatsapp: wa,
+      slug,
+      branches: modalBranches,
+      products: modalProducts
+    });
+    showToast('Cafetería creada');
+  }
+
+  save();
+  render();
+  closeModal('cafe-modal');
+}
+
+// ─── INLINE EDIT ─────────────────────────────────────────────────────────────
+function addBranch(cafeId) {
+  const input = document.getElementById('new-branch-' + cafeId);
+  const val = input.value.trim();
+  if (!val) return;
+  const cafe = cafes.find(c => c.id === cafeId);
+  if (cafe.branches.includes(val)) { showToast('Esa sucursal ya existe'); return; }
+  cafe.branches.push(val);
+  save();
+  render();
+  // reabrir el detalle
+  setTimeout(() => {
+    toggleDetail(cafeId);
+    document.getElementById('new-branch-' + cafeId).focus();
+  }, 10);
+}
+
+function removeBranch(cafeId, branch) {
+  const cafe = cafes.find(c => c.id === cafeId);
+  cafe.branches = cafe.branches.filter(b => b !== branch);
+  save();
+  const wasOpen = document.getElementById('detail-' + cafeId).classList.contains('open');
+  render();
+  if (wasOpen) setTimeout(() => toggleDetail(cafeId), 10);
+}
+
+function addProduct(cafeId) {
+  const input = document.getElementById('new-product-' + cafeId);
+  const val = input.value.trim();
+  if (!val) return;
+  const cafe = cafes.find(c => c.id === cafeId);
+  if (cafe.products.includes(val)) { showToast('Ese producto ya existe'); return; }
+  cafe.products.push(val);
+  save();
+  render();
+  setTimeout(() => {
+    toggleDetail(cafeId);
+    document.getElementById('new-product-' + cafeId).focus();
+  }, 10);
+}
+
+function removeProduct(cafeId, product) {
+  const cafe = cafes.find(c => c.id === cafeId);
+  cafe.products = cafe.products.filter(p => p !== product);
+  save();
+  const wasOpen = document.getElementById('detail-' + cafeId).classList.contains('open');
+  render();
+  if (wasOpen) setTimeout(() => toggleDetail(cafeId), 10);
+}
+
+function deleteCafe(id) {
+  const cafe = cafes.find(c => c.id === id);
+  if (!confirm(`¿Eliminar "${cafe.name}"? Esta acción no se puede deshacer.`)) return;
+  cafes = cafes.filter(c => c.id !== id);
+  save();
+  render();
+  showToast('Cafetería eliminada');
+}
+
+// Cerrar modal con Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+});
+
+// Cerrar modal al hacer click en overlay
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+});
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+render();
+</script>
 </body>
 </html>
